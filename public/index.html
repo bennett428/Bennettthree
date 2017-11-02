@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+    <style>
+        body{
+            background-color: darkgrey;
+            height: 100%;
+            margin: 0;
+            overflow:hidden;
+        }
+        .viewport {
+            top: 0px;
+            left: 0px;
+            position: absolute;
+            z-index: -1;
+        }
+        .buttons {
+            z-index: 2;
+        }
+    </style>
+<body>
+
+    <div id='container' class='viewport'></div>
+    <button class='buttons' onclick="function1();">Cube it!</button>
+    <button class='buttons' onclick="function2();">Cylinder it!</button>
+    <button class='buttons' onclick="function3();">Torus it!</button>
+    <button class='buttons' onclick="function4();">Cone it!</button>
+    <button class='buttons' onclick="function5();">Sphere it!</button>
+    
+    <script src="/js/three.js"></script>
+    <script src="/js/controls/OrbitControls.js"></script>
+     <script src='/socket.io/socket.io.js'></script>
+
+</body>
+    <script>
+        console.log("hello");
+        
+        var container;
+        var camera;
+        var scene;
+        var renderer;
+        
+         var socket = io.connect('/');
+        
+        function function1(data1){
+            var geometry = new THREE.BoxGeometry( 20, 20, 20 );
+            var material = new THREE.MeshStandardMaterial( {color: 0xff0000} );
+            var cube = new THREE.Mesh( geometry, material );
+            cube.position.x = Math.random()*200-100;
+            cube.position.y = Math.random()*200-100;
+            cube.position.z = Math.random()*200-100;
+             var f1data = {
+                x: cube.position.x,
+                y: cube.position.y,
+                z: cube.position.z,
+            }
+            console.log(f1data);
+            socket.emit('clientSendf1DataToServer',f1data);          
+            scene.add( cube );
+        }
+        
+         function function2(){
+             var geometry = new THREE.CylinderGeometry( 10, 10, 40, 64 );
+             var material = new THREE.MeshLambertMaterial( {color: 0x006400} );
+             var cylinder = new THREE.Mesh( geometry, material );
+             cylinder.position.x = Math.random()*200-100;
+            cylinder.position.y = Math.random()*200-100;
+            cylinder.position.z = Math.random()*200-100;
+             var f2data = {
+                x: cylinder.position.x,
+                y: cylinder.position.y,
+                z: cylinder.position.z,
+            }
+               console.log(f2data);
+             socket.emit('clientSendf2DataToServer',f2data); 
+             scene.add( cylinder );
+        }
+        
+         function function3(){
+            var geometry = new THREE.TorusKnotBufferGeometry( 10, 3, 100, 16 );
+            var material = new THREE.MeshLambertMaterial( { color: 0x0000ff } );
+            var torusKnot = new THREE.Mesh( geometry, material );
+            torusKnot.position.x = Math.random()*200-100;
+            torusKnot.position.y = Math.random()*200-100;
+            torusKnot.position.z = Math.random()*200-100;
+              var f3data = {
+                x: torusKnot.position.x,
+                y: torusKnot.position.y,
+                z: torusKnot.position.z,
+            }
+               console.log(f3data);
+             socket.emit('clientSendf3DataToServer',f3data); 
+            scene.add( torusKnot );
+        }
+        
+         function function4(){
+            var geometry = new THREE.ConeBufferGeometry( 10, 40, 64 );
+            var material = new THREE.MeshStandardMaterial( {color: 0xD2691E} );
+            var cone = new THREE.Mesh( geometry, material );
+            cone.position.x = Math.random()*200-100;
+            cone.position.y = Math.random()*200-100;
+            cone.position.z = Math.random()*200-100;
+              var f4data = {
+                x: cone.position.x,
+                y: cone.position.y,
+                z: cone.position.z,
+            }
+              socket.emit('clientSendf4DataToServer',f4data); 
+               console.log(f4data);
+            scene.add( cone );
+        }
+        
+         function function5(){ 
+             
+            var geometry = new THREE.SphereGeometry( 10, 64, 64);
+             var material = new THREE.MeshStandardMaterial( {color: 0x9400D3} );
+             var sphere = new THREE.Mesh( geometry, material );
+         sphere.position.x = Math.random()*200-100;
+            sphere.position.y = Math.random()*200-100;
+           sphere.position.z = Math.random()*200-100;   
+              var f5data = {
+                x: sphere.position.x,
+                y: sphere.position.y,
+                z: sphere.position.z,
+            }
+              socket.emit('clientSendf5DataToServer',f5data); 
+               console.log(f5data);
+             scene.add( sphere );
+        }
+        
+        
+        function init() {
+            container = document.getElementById( 'container' );
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color( 0x5F8CC7 );
+			camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 1, 10000 );
+			camera.position.set( 0, 250, 1000 );
+			scene.add( camera );
+			scene.add( new THREE.AmbientLight( 0xFFFFE0) );
+			var light = new THREE.SpotLight( 0xffffff, 1.5 );
+			light.position.set( 0, 1500, 200 );
+			light.castShadow = true;
+			light.shadow = new THREE.LightShadow( new THREE.PerspectiveCamera( 70, 1, 200, 2000 ) );
+			light.shadow.bias = -0.000222;
+			light.shadow.mapSize.width = 1024;
+			light.shadow.mapSize.height = 1024;
+			scene.add( light );
+			spotlight = light;
+			var planeGeometry = new THREE.PlaneGeometry( 2000, 2000 );
+			planeGeometry.rotateX( - Math.PI / 2 );
+			var planeMaterial = new THREE.ShadowMaterial( { opacity: 0.2 } );
+			var plane = new THREE.Mesh( planeGeometry, planeMaterial );
+			plane.position.y = -200;
+			plane.receiveShadow = true;
+			scene.add( plane );
+			var helper = new THREE.GridHelper( 2000, 100 );
+			helper.position.y = - 199;
+			helper.material.opacity = 0.25;
+			helper.material.transparent = true;
+			scene.add( helper );
+			var axis = new THREE.AxisHelper();
+			axis.position.set( -500, -500, -500 );
+			scene.add( axis );
+			renderer = new THREE.WebGLRenderer( { antialias: true } );
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.shadowMap.enabled = true;
+			container.appendChild( renderer.domElement );
+            
+            var controls = new THREE.OrbitControls( camera, renderer.domElement );
+            
+        }//end init
+        
+        function animate() {
+		  requestAnimationFrame( animate );
+		  render();
+        }
+		
+        function render() {
+		  renderer.render( scene, camera );
+        }
+        
+    
+        
+function update(data1,data2,data3,data4,data5) {
+            
+              socket.on('serverSendf1DataToClients',
+    function function1(data1){
+            var geometry = new THREE.BoxGeometry( 20, 20, 20 );
+            var material = new THREE.MeshStandardMaterial( {color: 0xff0000} );
+            var cube = new THREE.Mesh( geometry, material );
+            cube.position.x = data1.x;
+            cube.position.y = data1.y;
+            cube.position.z = data1.z;     
+            scene.add( cube );})
+        
+        socket.on('serverSendf2DataToClients',
+         function function2(data2){
+             var geometry = new THREE.CylinderGeometry( 10, 10, 40, 64 );
+             var material = new THREE.MeshStandardMaterial( {color: 0x006400} );
+             var cylinder = new THREE.Mesh( geometry, material );
+             cylinder.position.x = data2.x;
+            cylinder.position.y = data2.y;
+            cylinder.position.z = data2.z;
+             scene.add( cylinder );
+        })
+        
+    socket.on('serverSendf3DataToClients',
+         function function3(data3){
+            var geometry = new THREE.TorusKnotBufferGeometry( 10, 3, 100, 16 );
+            var material = new THREE.MeshStandardMaterial( { color: 0x0000ff } );
+            var torusKnot = new THREE.Mesh( geometry, material );
+            torusKnot.position.x = data3.x;
+            torusKnot.position.y = data3.y;
+            torusKnot.position.z = data3.z;
+            scene.add( torusKnot );
+        })
+        socket.on('serverSendf4DataToClients',
+         function function4(data4){
+            var geometry = new THREE.ConeBufferGeometry( 10, 40, 64 );
+            var material = new THREE.MeshStandardMaterial( {color: 0xD2691E} );
+            var cone = new THREE.Mesh( geometry, material );
+            cone.position.x = data4.x;
+            cone.position.y = data4.y;
+            cone.position.z = data4.z;
+            scene.add( cone );
+        })
+        socket.on('serverSendf5DataToClients',
+         function function5(data5){  
+            var geometry = new THREE.SphereGeometry( 10, 64, 64);
+             var material = new THREE.MeshStandardMaterial( {color: 0x9400D3} );
+             var sphere = new THREE.Mesh( geometry, material );
+         sphere.position.x = data5.x;
+            sphere.position.y = data5.y;
+           sphere.position.z = data5.z;   
+             scene.add( sphere );
+        })   
+            
+        }//end update
+        
+       
+        init();
+        animate();
+        render();
+        update();
+        
+        
+        
+    </script>
+</html>
